@@ -13,7 +13,7 @@ pip install --upgrade dframe
 
 ## Try it out
 
-`dframe` should be intuitive to use. Try out these commands yourself to get a feel for it.
+`dframe` should be intuitive to use. Try out these commands yourself to get a feel for it. More features will be added soon. Please file feature requests/bugs as [issues](https://github.com/ankur-gupta/dframe/issues). 
 
 ```python
 import dframe as df

@@ -490,10 +490,7 @@ class DataFrame(object):
         # Pre-process some address types
         if isinstance(key, slice):
             key = range(*key.indices(len(self)))
-        # FIXME: Is it possible to convert all column index into
-        # a list of ints and then run through it?
-        # Would I need to throw error messages that are relevant to
-        # different kinds of errors?
+
         if isinstance(key, int):
             self._setitem_using_int_key(key, value)
         elif is_string_type(key):
@@ -546,35 +543,4 @@ class DataFrame(object):
             # Catchall for all other addresses
             msg = 'address must be int, string, list, slice, or a 2-tuple'
             raise KeyError(msg)
-
-
-
-
-
-# FIXME: Replace all isinstance(x, int) -> is_int_type
-# We have int64 which is not the same as int.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-x1 = DataFrame({'a': [1, 2, 3], 'b': ['a', 'i', 'o']})
-
-
-
-
-
-
-
 

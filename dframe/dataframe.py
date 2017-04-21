@@ -151,13 +151,17 @@ class DataFrame(object):
         return str(self)
 
     def __str__(self):
-        headers = self.names
-        headers.insert(0, '')
-        table = PrettyTable(headers)
-        for i, row in enumerate(self.rows()):
-            row.insert(0, i)
-            table.add_row(row)
-        return str(table)
+        if self.ncol == 0:
+            out = 'DataFrame with {} rows and {} columns'
+            return out.format(self.nrow, self.ncol)
+        else:
+            headers = self.names
+            headers.insert(0, '')
+            table = PrettyTable(headers)
+            for i, row in enumerate(self.rows()):
+                row.insert(0, i)
+                table.add_row(row)
+            return str(table)
 
     # --------------------------------------------------------------------
     # Shape information extraction functions
@@ -544,3 +548,50 @@ class DataFrame(object):
             msg = 'address must be int, string, list, slice, or a 2-tuple'
             raise KeyError(msg)
 
+    # --------------------------------------------------------------------
+    # Drop indexing
+    # --------------------------------------------------------------------
+    def __delitem__(self, key):
+        # Convert all kinds of inputs to a list of ints
+        if isinstance(key, int):
+            key = [key]
+        elif is_string_type(key):
+            key = [self._names_to_index[key]]
+        elif isinstance(key, slice):
+            key = range(*key.indices(len(self)))
+        elif isinstance(key, list):
+            if is_iterable_int_type(key):
+                pass
+            elif is_iterable_string_type(key):
+                key = [self._names_to_index[k] for k in key]
+            elif is_iterable_bool_type(key):
+                # Remember: length of key must match number of columns
+                msg = 'logical indexing not yet implemented'
+                raise NotImplementedError(msg)
+            else:
+                # FIXME: This message needs to be fixed when logical indexing
+                # is implemented.
+                msg = 'list address must contain all int or all string types'
+                raise KeyError(msg)
+        elif isinstance(key, float):
+            msg = 'float address is not supported; please cast to int'
+            raise KeyError(msg)
+        elif isinstance(key, bool):
+            msg = 'logical indexing must provide a list of full length'
+            raise KeyError(msg)
+        else:
+            # Catchall for all other addresses
+            msg = 'address must be int, string, list, or a slice'
+            raise KeyError(msg)
+
+        # Find the indices to keep
+        everything = set(range(len(self)))
+        if all([k in everything for k in key]):
+            keep = everything - set(key)
+            keep = sorted(list(keep))
+        else:
+            raise ValueError('all int column address must be valid')
+        self._data = [self._data[k] for k in keep]
+        self._names = [self._names[k] for k in keep]
+        self._update_nrow_ncol()
+        self._update_names_to_index()

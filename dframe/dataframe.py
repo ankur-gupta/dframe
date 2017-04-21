@@ -116,8 +116,8 @@ class DataFrame(object):
     def _update_nrow_ncol(self):
         column_lengths = set(map(len, self._data))
         if len(column_lengths) > 1:
-            msg = 'found different column lengths which is a a bug, '
-            'please report it'
+            msg = ('found different column lengths which is a a bug, '
+                   'please report it')
             raise ValueError(msg)
         elif len(column_lengths) == 0:
             self._nrow = 0
@@ -348,8 +348,8 @@ class DataFrame(object):
         assert is_iterable_int_type(key)
         assert isinstance(value, np.array)
         if len(value.shape) > 2:
-            msg = 'provided value and address must has the same number of '
-            'dimensions'
+            msg = ('provided value and address must has the same number of '
+                   'dimensions')
             raise ValueError(msg)
         elif len(value.shape) == 2:
             if len(key) == value.shape[1]:
@@ -357,12 +357,12 @@ class DataFrame(object):
                     for i, k in enumerate(key):
                         self._setitem_using_int_key(k, value[:, i])
                 else:
-                    msg = 'provided value and address do not have the '
-                    'same number of rows'
+                    msg = ('provided value and address do not have the '
+                           'same number of rows')
                     raise ValueError(msg)
             else:
-                msg = 'provided value and address do not have the '
-                'same number of columns'
+                msg = ('provided value and address do not have the '
+                       'same number of columns')
                 raise ValueError(msg)
         elif len(value.shape) == 1:
             # FIXME: Should I even support this?
@@ -371,8 +371,8 @@ class DataFrame(object):
                 for k, v in zip(key, value):
                         self._setitem_using_int_key(k, v)
             else:
-                msg = 'provided value and address do not have the '
-                'same number of columns'
+                msg = ('provided value and address do not have the '
+                       'same number of columns')
                 raise ValueError(msg)
         elif len(value.shape) == 0:
             msg = 'internal error; numpy array has a zero-length shape tuple'
@@ -388,16 +388,16 @@ class DataFrame(object):
                     for i, k in enumerate(key):
                         self._setitem_using_int_key(k, value.iloc[:, i])
                 else:
-                    msg = 'provided value and address do not have the '
-                    'same number of rows'
+                    msg = ('provided value and address do not have the '
+                           'same number of rows')
                     raise ValueError(msg)
             else:
-                msg = 'provided value and address do not have the '
-                'same number of columns'
+                msg = ('provided value and address do not have the '
+                       'same number of columns')
                 raise ValueError(msg)
         else:
-            msg = 'assigning a pandas DataFrame value of shape = {} '
-            'is not supported'
+            msg = ('assigning a pandas DataFrame value of shape = {} '
+                   'is not supported')
             raise NotImplementedError(msg.format(value.shape))
 
     def _setitem_elements_list_of_int_numpy_value(
@@ -410,12 +410,12 @@ class DataFrame(object):
                 for i, k in enumerate(col_address):
                     self._data[k][row_address] = value[:, i]
             else:
-                msg = 'provided value and address do not have the '
-                'same number of columns'
+                msg = ('provided value and address do not have the '
+                       'same number of columns')
                 raise ValueError(msg)
         else:
-            msg = 'provided value and address must has the same number of '
-            'dimensions'
+            msg = ('provided value and address must has the same number of '
+                   'dimensions')
             raise ValueError(msg)
 
     def _setitem_elements_list_of_int_pandas_value(
@@ -428,12 +428,12 @@ class DataFrame(object):
                 for i, k in enumerate(col_address):
                     self._data[k][row_address] = value.iloc[:, i]
             else:
-                msg = 'provided value and address do not have the '
-                'same number of columns'
+                msg = ('provided value and address do not have the '
+                       'same number of columns')
                 raise ValueError(msg)
         else:
-            msg = 'provided value and address must has the same number of '
-            'dimensions'
+            msg = ('provided value and address must has the same number of '
+                   'dimensions')
             raise ValueError(msg)
 
     def _setitem_using_row_col_address(self, row_address, col_address, value):
@@ -445,8 +445,8 @@ class DataFrame(object):
         elif is_string_type(col_address):
             self._data[self._names_to_index[col_address]][row_address] = value
         elif isinstance(col_address, slice):
-            msg = 'slice address found in the wrong conditional, '
-            'which is a bug, please report it'
+            msg = ('slice address found in the wrong conditional, '
+                   'which is a bug, please report it')
             raise ValueError(msg)
         elif isinstance(col_address, list):
             col_address = \
@@ -460,22 +460,22 @@ class DataFrame(object):
                     for k, v in zip(col_address, value):
                         self._data[k][row_address] = v
                 else:
-                    msg = 'column address and value must have the same number '
-                    'of items'
+                    msg = ('column address and value must have the same '
+                           'number of items')
                     raise ValueError(msg)
             elif isinstance(value, np.array):
                 self._setitem_elements_list_of_int_numpy_value(
                     row_address, col_address, value)
             elif isinstance(value, pd.Series):
-                msg = 'pandas Series is not supported, please use pandas '
-                'DataFrame instead'
+                msg = ('pandas Series is not supported, please use pandas '
+                       'DataFrame instead')
                 raise ValueError(msg)
             elif isinstance(value, pd.DataFrame):
                 self._setitem_elements_list_of_int_pandas_value(
                     row_address, col_address, value)
             elif isinstance(col_address, float):
-                msg = 'float column address is not supported; '
-                'please cast to int'
+                msg = ('float column address is not supported; '
+                       'please cast to int')
                 raise KeyError(msg)
         elif isinstance(col_address, bool):
             msg = 'logical column indexing must provide a list of full length'
@@ -499,8 +499,8 @@ class DataFrame(object):
             else:
                 self._append_new_column(key, value)
         elif isinstance(key, slice):
-            msg = 'slice address found in the wrong conditional, '
-            'which is a bug, please report it'
+            msg = ('slice address found in the wrong conditional, '
+                   'which is a bug, please report it')
             raise ValueError(msg)
         elif isinstance(key, list):
             # Get a valid list-of-int key after running through all checks
@@ -518,8 +518,8 @@ class DataFrame(object):
             elif isinstance(value, np.array):
                 self._setitem_columns_list_of_int_numpy_value(key, value)
             elif isinstance(value, pd.Series):
-                msg = 'pandas Series is not supported, please use pandas '
-                'DataFrame instead'
+                msg = ('pandas Series is not supported, please use pandas '
+                       'DataFrame instead')
                 raise ValueError(msg)
             elif isinstance(value, pd.DataFrame):
                 self._setitem_columns_list_of_int_pandas_value(key, value)

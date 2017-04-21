@@ -82,8 +82,8 @@ class Column(object):
                         for k, v in zip(key, value):
                             self.data[k] = v
                     else:
-                        msg = 'provided address (len={}) and value (len={})'
-                        'must have the same length'
+                        msg = ('provided address (len={}) and value (len={}) '
+                               'must have the same length')
                         raise ValueError(msg.format(len(key), length_value))
                 else:
                     msg = 'provided value must match existing dtype = {}'

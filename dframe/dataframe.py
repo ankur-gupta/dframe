@@ -110,10 +110,10 @@ class DataFrame(object):
         self._names = _names
 
         # Update all other fields
-        self._update_nrow_nrol()
+        self._update_nrow_ncol()
         self._update_names_to_index()
 
-    def _update_nrow_nrol(self):
+    def _update_nrow_ncol(self):
         column_lengths = set(map(len, self._data))
         if len(column_lengths) > 1:
             msg = 'found different column lengths which is a a bug, '
@@ -299,7 +299,7 @@ class DataFrame(object):
         if len(tmp) == self._nrow:
             self._names.append(name)
             self._data.append(tmp)
-            self._update_nrow_nrol()
+            self._update_nrow_ncol()
             self._update_names_to_index()
         else:
             msg = 'provided value must match number of rows = {}'

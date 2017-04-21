@@ -595,3 +595,41 @@ class DataFrame(object):
         self._names = [self._names[k] for k in keep]
         self._update_nrow_ncol()
         self._update_names_to_index()
+
+    # --------------------------------------------------------------------
+    # Interface
+    # --------------------------------------------------------------------
+    def rename(self, rename_dict):
+        '''
+            Rename the columns of the DataFrame object. Renaming happens
+            in place.
+
+            Args
+            -----
+            rename_dict (dict): a dictionary of the form
+                {'existing_column_name': 'new_column_name', ... }. Keys of
+                `rename_dict` are the existing column names. Values of
+                `rename_dict` are the intended new column names.
+
+            Returns
+            --------
+            Nothing. Renaming happens in place.
+        '''
+        # FIXME: Should we use duck typing instead of checking for dict type?
+        assert isinstance(rename_dict, dict)
+        new_names = self.names
+        for existing_name, new_name in rename_dict.items():
+            new_names[self._names_to_index[existing_name]] = \
+                new_name
+        if is_iterable_string_type(new_names):
+            if is_list_unique(new_names):
+                self._names = new_names
+                self._update_names_to_index()
+                if set(self._names_to_index.keys()) != set(self._names):
+                    msg = ('renaming failed to maintain name consistency; ',
+                           'this is a bug, please report it')
+                    raise ValueError(msg)
+            else:
+                raise ValueError('renaming cannot create duplicate names')
+        else:
+            raise ValueError('new column names must all be strings')

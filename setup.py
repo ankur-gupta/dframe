@@ -20,7 +20,7 @@ setup(name='dframe',
           'csv',
           'collections',
           'prettytable',
-          'dateutil'
+          'python-dateutil'
       ],
       setup_requires=['pytest-runner'],
       tests_require=['pytest'],

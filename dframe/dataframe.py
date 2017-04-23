@@ -105,6 +105,41 @@ class DataFrame(object):
             raise ValueError(msg)
 
     @classmethod
+    def from_pandas(cls, df):
+        '''
+            Create a dframe.DataFrame from pandas.DataFrame object.
+
+            Args
+            -----
+                df (pandas.DataFrame): input dataframe
+
+
+            Returns
+            --------
+                dframe.DataFrame
+
+            Notes
+            ------
+            1. pandas.DataFrame allows duplicate column names,  which is not
+            allowed in dframe.DataFrame. Attempt to convert a
+            pandas.DataFrame with duplicate names into a dframe.DataFrame
+            will fail. Please rename pandas.DataFrame columns to have unique
+            names.
+
+            2. pandas.Series objects are not supported. Please convert
+            pandas.Series into a pandas.DataFrame object and then use
+            this function.
+        '''
+        if isinstance(df, pd.Series):
+            msg = ('pandas Series is not supported, please use pandas '
+                   'DataFrame instead')
+            raise ValueError(msg)
+        else:
+            assert isinstance(df, pd.DataFrame)
+        items = [(name, df[name]) for name in df]
+        return cls.from_items(items)
+
+    @classmethod
     def from_shape(cls, shape, names=None):
         if get_length(shape) == 2:
             if is_iterable_int_type(shape):

@@ -63,10 +63,22 @@ class DataFrame(object):
                     for j in range(ncol)]
                 return cls.from_items(columns)
             else:
-                msg = 'number of names must match the number of rows'
+                msg = 'number of names must match the number of columns'
                 raise ValueError(msg)
         else:
             msg = 'all rows must have the same number of columns'
+            raise ValueError(msg)
+
+    @classmethod
+    def from_columns(cls, list_of_columns, names=None):
+        ncol = get_length(list_of_columns)
+        if names is None:
+            names = _get_generic_names(ncol)
+        if ncol == get_length(names):
+            columns = [(names[j], list_of_columns[j]) for j in range(ncol)]
+            return cls.from_items(columns)
+        else:
+            msg = 'number of names must match the number of columns'
             raise ValueError(msg)
 
     @classmethod
@@ -76,10 +88,6 @@ class DataFrame(object):
             return cls(OrderedDict(data))
         else:
             raise ValueError('provided column names must be unique')
-
-    @classmethod
-    def from_iterable(cls, data):
-        raise NotImplementedError('not yet implemented')
 
     @classmethod
     def from_array(cls, data):

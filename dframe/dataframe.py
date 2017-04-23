@@ -1,11 +1,17 @@
 import numpy as np
 import pandas as pd
+import csv
 from collections import OrderedDict
 from prettytable import PrettyTable
 
 from _column import Column
 from utils import is_list_unique, is_scalar, is_string_type, \
-    is_iterable_string_type, is_iterable_int_type, is_iterable_bool_type
+    is_iterable_string_type, is_iterable_int_type, is_iterable_bool_type, \
+    get_length, is_list_same, to_best_dtype
+
+
+def _get_generic_names(ncol):
+    return ['C{}'.format(i) for i in range(ncol)]
 
 
 class DataFrame(object):
@@ -41,8 +47,27 @@ class DataFrame(object):
         return cls(data)
 
     @classmethod
-    def from_rows(cls, data):
-        raise NotImplementedError('not yet implemented')
+    def from_rows(cls, list_of_rows, names=None):
+        nrow = get_length(list_of_rows)
+        ncol_per_row = [get_length(row) for row in list_of_rows]
+        if is_list_same(ncol_per_row):
+            if len(ncol_per_row) == 0:
+                ncol = 0
+            else:
+                ncol = ncol_per_row[0]
+            if names is None:
+                names = _get_generic_names(ncol)
+            if ncol == get_length(names):
+                columns = [
+                    (names[j], [list_of_rows[i][j] for i in range(nrow)])
+                    for j in range(ncol)]
+                return cls.from_columns(columns)
+            else:
+                msg = 'number of names must match the number of rows'
+                raise ValueError(msg)
+        else:
+            msg = 'all rows must have the same number of columns'
+            raise ValueError(msg)
 
     @classmethod
     def from_columns(cls, data):
@@ -61,8 +86,19 @@ class DataFrame(object):
         raise NotImplementedError('not yet implemented')
 
     @classmethod
-    def from_csv(cls, data):
-        raise NotImplementedError('not yet implemented')
+    def from_csv(cls, path, infer_dtypes=True, header=True, delimiter=','):
+        # FIXME: Handle missing data!
+        with open(path, 'r') as f:
+            r = csv.reader(f, delimiter=delimiter, doublequote)
+            rows = [row for row in r]
+        if header:
+            df = cls.from_rows(rows[1:], rows[0])
+        else:
+            df = cls.from_rows(rows)
+        if infer_dtypes:
+            for j, value in enumerate(df.values()):
+                df[j] = to_best_dtype(df[j])
+        return df
 
     def _init_from_dict(self, data):
         # Behavior depends on whether values are scalar or not.
@@ -184,6 +220,20 @@ class DataFrame(object):
         # disturb our internal data model.
         return list(self._names)
 
+    @names.setter
+    def names(self, value):
+        if len(self._names) == get_length(value):
+            if is_iterable_string_type(value):
+                self._names = value
+                self._update_names_to_index()
+            else:
+                msg = 'all names must be strings'
+                raise ValueError(msg)
+        else:
+            msg = ('number of names provided must match the number '
+                   'of columns')
+            raise ValueError(msg)
+
     @property
     def dtypes(self):
         return [column.dtype for column in self._data]
@@ -206,6 +256,12 @@ class DataFrame(object):
 
     def columns(self):
         return self.values()
+
+    # --------------------------------------------------------------------
+    # Shape information extraction functions
+    # --------------------------------------------------------------------
+    def head(self, nrows=6):
+        return self[:nrows, :]
 
     # --------------------------------------------------------------------
     # Get Indexing

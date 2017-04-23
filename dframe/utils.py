@@ -1,4 +1,5 @@
 import six
+from dateutil import parser
 
 
 def infer_dtype(data):
@@ -28,6 +29,29 @@ def infer_dtype(data):
         msg = 'Multiple types detected in input: {}'
         raise ValueError(msg.format(types))
     return dtype
+
+
+def to_dtype_iterable(data, dtypefun):
+    for i, elem in enumerate(data):
+        if elem is not None:
+            data[i] = dtypefun(elem)
+    return data
+
+
+def to_best_dtype(data):
+    dtype = infer_dtype(data)
+    if dtype is str:
+        try:
+            data = to_dtype_iterable(data, int)
+        except ValueError:
+            try:
+                data = to_dtype_iterable(data, float)
+            except ValueError:
+                try:
+                    data = to_dtype_iterable(data, parser.parse)
+                except ValueError:
+                    pass
+    return data
 
 
 def is_string_type(x):
@@ -69,6 +93,17 @@ def is_list_unique(x):
 def is_iterable_unique(x):
     assert not is_scalar(x)
     return is_list_unique([elem for elem in x])
+
+
+def is_list_same(x):
+    assert isinstance(x, list)
+    n_same_elements = len(set(x))
+    return n_same_elements == 0 or n_same_elements == 1
+
+
+def is_iterable_same(x):
+    assert not is_scalar(x)
+    return is_list_same([elem for elem in x])
 
 
 def is_iterable_string_type(x):

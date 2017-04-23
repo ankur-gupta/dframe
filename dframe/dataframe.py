@@ -91,6 +91,7 @@ class DataFrame(object):
 
     @classmethod
     def from_numpy(cls, array, names=None):
+        # FIX: Handle missing values. Convert them to None.
         assert isinstance(array, np.ndarray)
         if len(array.shape) == 0:
             msg = 'internal error; numpy array has a zero-length shape tuple'
@@ -136,6 +137,7 @@ class DataFrame(object):
             raise ValueError(msg)
         else:
             assert isinstance(df, pd.DataFrame)
+        # FIX: Handle missing values. Convert them to None.
         items = [(name, df[name]) for name in df]
         return cls.from_items(items)
 

@@ -82,15 +82,15 @@ class DataFrame(object):
             raise ValueError(msg)
 
     @classmethod
-    def from_items(cls, data):
+    def from_items(cls, items):
         # Ensure names are unique
-        if is_list_unique([name for name, _ in data]):
-            return cls(OrderedDict(data))
+        if is_list_unique([name for name, _ in items]):
+            return cls(OrderedDict(items))
         else:
             raise ValueError('provided column names must be unique')
 
     @classmethod
-    def from_array(cls, data):
+    def from_array(cls, array):
         raise NotImplementedError('not yet implemented')
 
     @classmethod

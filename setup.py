@@ -17,7 +17,6 @@ setup(name='dframe',
           'pandas',
           'numpy',
           'six',
-          'csv',
           'prettytable',
           'python-dateutil'
       ],

@@ -16,7 +16,7 @@ def hstack(dfs):
             names_per_df = [name for df in dfs for name in df.names]
             if is_list_unique(names_per_df):
                 columns = [column for df in dfs for column in df.items()]
-                return DataFrame.from_columns(columns)
+                return DataFrame.from_items(columns)
             else:
                 msg = 'column names must not be repeated across DataFrames'
                 raise ValueError(msg)

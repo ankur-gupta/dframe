@@ -61,7 +61,7 @@ class DataFrame(object):
                 columns = [
                     (names[j], [list_of_rows[i][j] for i in range(nrow)])
                     for j in range(ncol)]
-                return cls.from_columns(columns)
+                return cls.from_items(columns)
             else:
                 msg = 'number of names must match the number of rows'
                 raise ValueError(msg)
@@ -70,7 +70,7 @@ class DataFrame(object):
             raise ValueError(msg)
 
     @classmethod
-    def from_columns(cls, data):
+    def from_items(cls, data):
         # Ensure names are unique
         if is_list_unique([name for name, _ in data]):
             return cls(OrderedDict(data))
@@ -89,7 +89,7 @@ class DataFrame(object):
     def from_csv(cls, path, infer_dtypes=True, header=True, delimiter=','):
         # FIXME: Handle missing data!
         with open(path, 'r') as f:
-            r = csv.reader(f, delimiter=delimiter, doublequote)
+            r = csv.reader(f, delimiter=delimiter)
             rows = [row for row in r]
         if header:
             df = cls.from_rows(rows[1:], rows[0])
@@ -275,7 +275,7 @@ class DataFrame(object):
             selection = [
                 (name, value)
                 for name, value in zip(self._names[key], self._data[key])]
-            return DataFrame.from_columns(selection)
+            return DataFrame.from_items(selection)
         elif isinstance(key, list):
             # FIXME: Can I use self._convert_list_col_address_to_list_of_int()?
             if is_iterable_int_type(key):
@@ -293,7 +293,7 @@ class DataFrame(object):
                 # is implemented.
                 msg = 'list address must contain all int or all string types'
                 raise KeyError(msg)
-            return DataFrame.from_columns(selection)
+            return DataFrame.from_items(selection)
         elif isinstance(key, float):
             msg = 'float address is not supported; please cast to int'
             raise KeyError(msg)
@@ -321,7 +321,7 @@ class DataFrame(object):
             # can support logical indexing too.
             row_selection = [(name, value[row_address])
                              for name, value in zip(self._names, self._data)]
-            selection = DataFrame.from_columns(row_selection)[col_address]
+            selection = DataFrame.from_items(row_selection)[col_address]
 
             # Unbox if provided address happens to refer to a scalar
             if isinstance(row_address, int):

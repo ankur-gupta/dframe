@@ -90,8 +90,19 @@ class DataFrame(object):
             raise ValueError('provided column names must be unique')
 
     @classmethod
-    def from_array(cls, array, names=None):
-        raise NotImplementedError('not yet implemented')
+    def from_numpy(cls, array, names=None):
+        assert isinstance(array, np.ndarray)
+        if len(array.shape) == 0:
+            msg = 'internal error; numpy array has a zero-length shape tuple'
+            raise ValueError(msg)
+        elif len(array.shape) == 1:
+            return cls.from_columns([array], names)
+        elif len(array.shape) == 2:
+            columns = [array[:, j] for j in range(array.shape[1])]
+            return cls.from_columns(columns, names)
+        else:
+            msg = 'numpy array dimensions must be less than or equal to 2'
+            raise ValueError(msg)
 
     @classmethod
     def from_shape(cls, shape, names=None):

@@ -1,5 +1,7 @@
 # dframe 
 
+[![Build Status](https://travis-ci.org/ankur-gupta/dframe.png?branch=master)](https://travis-ci.org/ankur-gupta/dframe)
+
 `dframe` is an indexless implementation of the dataframe data structure. 
 It focuses on ease-of-use over computational efficiency.
 

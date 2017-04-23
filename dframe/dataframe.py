@@ -58,10 +58,10 @@ class DataFrame(object):
             if names is None:
                 names = _get_generic_names(ncol)
             if ncol == get_length(names):
-                columns = [
+                items = [
                     (names[j], [list_of_rows[i][j] for i in range(nrow)])
                     for j in range(ncol)]
-                return cls.from_items(columns)
+                return cls.from_items(items)
             else:
                 msg = 'number of names must match the number of columns'
                 raise ValueError(msg)
@@ -75,8 +75,8 @@ class DataFrame(object):
         if names is None:
             names = _get_generic_names(ncol)
         if ncol == get_length(names):
-            columns = [(names[j], list_of_columns[j]) for j in range(ncol)]
-            return cls.from_items(columns)
+            items = [(names[j], list_of_columns[j]) for j in range(ncol)]
+            return cls.from_items(items)
         else:
             msg = 'number of names must match the number of columns'
             raise ValueError(msg)

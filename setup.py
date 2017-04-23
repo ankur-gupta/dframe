@@ -18,7 +18,6 @@ setup(name='dframe',
           'numpy',
           'six',
           'csv',
-          'collections',
           'prettytable',
           'python-dateutil'
       ],

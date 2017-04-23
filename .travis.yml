@@ -1,10 +1,11 @@
 language: python
 python:
   - "2.7"
-script: py.test
+script: py.test --cov=./
 before_install:
   - pip install codecov
+  - pip install pytest-cov
 install:
-  - python setup.py install --record installed_files.txt
+  - python setup.py install
 after_success:
   - codecov -t ${CODECOV_TOKEN}

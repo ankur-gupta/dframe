@@ -90,8 +90,33 @@ class DataFrame(object):
             raise ValueError('provided column names must be unique')
 
     @classmethod
-    def from_array(cls, array):
+    def from_array(cls, array, names=None):
         raise NotImplementedError('not yet implemented')
+
+    @classmethod
+    def from_shape(cls, shape, names=None):
+        if get_length(shape) == 2:
+            if is_iterable_int_type(shape):
+                if (shape[0] >= 0) and (shape[1] >= 0):
+                    if names is None:
+                        names = _get_generic_names(shape[1])
+                    if shape[1] == get_length(names):
+                        items = [(names[j], [None for i in range(shape[0])])
+                                 for j in range(shape[1])]
+                        return cls.from_items(items)
+                    else:
+                        msg = ('number of names must match the number of '
+                               'columns')
+                        raise ValueError(msg)
+                else:
+                    msg = 'shape elements must be non-negative'
+                    raise ValueError(msg)
+            else:
+                msg = 'shape elements must be int'
+                raise ValueError(msg)
+        else:
+            msg = 'shape must have exactly two elements'
+            raise ValueError(msg)
 
     @classmethod
     def from_csv(cls, path, infer_dtypes=True, header=True, delimiter=','):

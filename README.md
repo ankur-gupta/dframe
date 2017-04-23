@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/ankur-gupta/dframe.svg?branch=master)](https://travis-ci.org/ankur-gupta/dframe)
 [![codecov](https://codecov.io/gh/ankur-gupta/dframe/branch/master/graph/badge.svg)](https://codecov.io/gh/ankur-gupta/dframe)
+[![Documentation Status](https://readthedocs.org/projects/dframe/badge/?version=latest)](http://dframe.readthedocs.io/en/latest/?badge=latest)
 
 
 `dframe` is an indexless implementation of the dataframe data structure. 

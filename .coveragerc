@@ -1,2 +1,0 @@
-pip install pytest-cov
-py.test --cov=./

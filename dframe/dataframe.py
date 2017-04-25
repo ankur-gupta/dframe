@@ -268,6 +268,7 @@ class DataFrame(object):
         return str(self)
 
     def __str__(self):
+        max_nrows = 60
         if self.ncol == 0:
             out = 'DataFrame with {} rows and {} columns'
             return out.format(self.nrow, self.ncol)
@@ -275,10 +276,25 @@ class DataFrame(object):
             headers = self.names
             headers.insert(0, '')
             table = PrettyTable(headers)
-            for i, row in enumerate(self.rows()):
-                row.insert(0, i)
-                table.add_row(row)
-            return str(table)
+            if self.nrow <= max_nrows:
+                for i, row in enumerate(self.rows()):
+                    row.insert(0, i)
+                    table.add_row(row)
+                return str(table)
+            else:
+                for i in xrange(max_nrows / 2):
+                    row = self[i, :].rows()[0]
+                    row.insert(0, i)
+                    table.add_row(row)
+                divider = ['...' for _ in range(self.ncol)]
+                divider.insert(0, '')
+                table.add_row(divider)
+                for i in xrange(max_nrows / 2, 0, -1):
+                    row = self[self.nrow - i, :].rows()[0]
+                    row.insert(0, self.nrow - i)
+                    table.add_row(row)
+                out = '{}\n\n[{} rows x {} columns]'
+                return out.format(str(table), self.nrow, self.ncol)
 
     # --------------------------------------------------------------------
     # Shape information extraction functions

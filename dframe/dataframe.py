@@ -30,6 +30,9 @@ class DataFrame(object):
         if isinstance(data, dict):
             self._init_from_dict(data)
         elif isinstance(data, self.__class__):
+            # FIXME: Should I copy the items inside data?
+            # Pandas doesn't copy it either.
+            # y = pd.DataFrame(x); y.iloc[0, 0] = something new; changes x.
             self._data = data._data
             self._names = data._names
             self._names_to_index = data._names_to_index

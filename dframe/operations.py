@@ -40,8 +40,14 @@ def vstack(dfs):
                 dfs = [df[names] for df in dfs]
                 dtypes_per_df = [tuple(df.dtypes) for df in dfs]
                 if is_list_same(dtypes_per_df):
-                    rows = [row for df in dfs for row in df.rows()]
-                    return DataFrame.from_rows(rows)
+                    items = [(name, [elem for df in dfs for elem in df[name]])
+                             for name in names]
+                    return DataFrame.from_items(items)
+                    # # This incredibly slow but simple to understand
+                    # # step was in the previous implementation.
+                    # # FIXME: Remove this after testing.
+                    # rows = [row for df in dfs for row in df.rows()]
+                    # return DataFrame.from_rows(rows)
                 else:
                     msg = ('columns of the same name must have the same '
                            'dtype')

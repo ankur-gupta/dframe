@@ -733,6 +733,7 @@ class DataFrame(object):
             msg = 'logical indexing must provide a list of full length'
             raise KeyError(msg)
         else:
+            # FIXME: allow df[<something>, :].
             # Catchall for all other addresses
             msg = 'address must be int, string, list, or a slice'
             raise KeyError(msg)
@@ -786,3 +787,28 @@ class DataFrame(object):
                 raise ValueError('renaming cannot create duplicate names')
         else:
             raise ValueError('new column names must all be strings')
+
+    def reset_names(self):
+        self.names = _get_generic_names(self.ncol)
+
+    def equals(self, other):
+        if self is other:
+            return True
+        else:
+            if type(self) is type(other):
+                name_size_logical = (self._ncol == other._ncol) and \
+                    (self._nrow == other._nrow) and \
+                    (self._names == other._names) and \
+                    (self._names_to_index == other._names_to_index)
+                if name_size_logical:
+                    if len(self._data) == len(other._data):
+                        data_logical = all([
+                            x.equals(y)
+                            for x, y in zip(self._data, other._data)])
+                        return data_logical
+                    else:
+                        return False
+                else:
+                    return False
+            else:
+                return False

@@ -32,6 +32,13 @@ class Column(object):
                    'data': self.data, 'dtype': self.dtype.__name__}
         return msg.format(**msgdict)
 
+    def equals(self, other):
+        if self is other:
+            return True
+        else:
+            return (type(self) is type(other)) and \
+                (self.dtype == other.dtype) and (self.data == other.data)
+
     def _is_valid_dtype_element(self, element):
         if self.dtype is type(None):
             return True

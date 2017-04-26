@@ -27,7 +27,7 @@ def infer_dtype(data):
         dtype = types[0]
     else:
         msg = 'Multiple types detected in input: {}'
-        raise ValueError(msg.format(types))
+        raise ValueError(msg.format(map(lambda x: x.__name__, types)))
     return dtype
 
 
@@ -36,6 +36,15 @@ def to_dtype_iterable(data, dtypefun):
         if elem is not None:
             data[i] = dtypefun(elem)
     return data
+
+
+def to_bool(x):
+    if x == 'True':
+        return True
+    elif x == 'False':
+        return False
+    else:
+        raise ValueError('invalid literal for to_bool(): {}'.format(x))
 
 
 def to_best_dtype(data):
@@ -50,7 +59,10 @@ def to_best_dtype(data):
                 try:
                     data = to_dtype_iterable(data, parser.parse)
                 except ValueError:
-                    pass
+                    try:
+                        data = to_dtype_iterable(data, to_bool)
+                    except ValueError:
+                        pass
     return data
 
 

@@ -14,6 +14,7 @@ setup(name='dframe',
       license='',
       packages=['dframe'],
       install_requires=[
+          'future',
           'pandas',
           'numpy',
           'prettytable',

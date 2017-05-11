@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='dframe',
-      version='0.1.4',
+      version='0.1.5',
       description='Easy-to-use, indexless dataframe data structure in Python.',
       classifiers=[
           'Development Status :: 3 - Alpha',
@@ -16,7 +16,6 @@ setup(name='dframe',
       install_requires=[
           'pandas',
           'numpy',
-          'six',
           'prettytable',
           'python-dateutil'
       ],

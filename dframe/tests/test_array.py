@@ -1,18 +1,22 @@
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import range
+
 import pytest
-from .._column import Column
+from dframe import Array
 
 
-class TestEmptyColumnObject:
-    x = Column([])
+class TestEmptyArray:
+    x = Array([])
 
     def test_valid_object_creation(self):
         ''' Ensure object is created correctly '''
+        assert isinstance(self.x, Array)
         assert len(self.x) == 0
-        assert self.x.data == []
         assert self.x.dtype is type(None)
 
     def test_invalid_indexing_for_empty_column(self):
-        ''' Ensure we see errors in indexing an empty Column object '''
+        ''' Ensure we see errors in indexing an empty Array object '''
         with pytest.raises(IndexError):
             self.x[0]
         with pytest.raises(IndexError):
@@ -28,47 +32,35 @@ class TestEmptyColumnObject:
 
     def test_invalid_indexing_by_type(self):
         with pytest.raises(TypeError):
-            # Column cannot be indexed using str
+            # Array cannot be indexed using str
             self.x['a']
         with pytest.raises(TypeError):
-            # Column cannot be indexed using float
+            # Array cannot be indexed using float
             self.x[34.45]
 
     def test_valid_indexing_slice(self):
-        assert isinstance(self.x[:], Column)
-        assert isinstance(self.x[1:], Column)
-        assert isinstance(self.x[:2], Column)
-        # This behavior matches list and pandas.
-        assert isinstance(self.x[1:2], Column)
+        assert isinstance(self.x[:], Array)
+        assert isinstance(self.x[1:], Array)
+        assert isinstance(self.x[:2], Array)
+        assert isinstance(self.x[1:2], Array)
 
 
-class TestBasicColumnIndexing:
-    y = Column([1, 2, 3, 4, 5])
+class TestBasicArrayIndexing:
+    n = 5
+    y = Array(range(n))
 
     def test_valid_object_creation(self):
         ''' Ensure object is created correctly '''
-        assert len(self.y) == 5
-        assert self.y.data == [1, 2, 3, 4, 5]
+        assert len(self.y) == self.n
         assert self.y.dtype is int
+        for i in range(self.n):
+            assert self.y[i] == i
 
     def test_valid_int_indexing(self):
-        assert isinstance(self.y[0], Column)
-        assert isinstance(self.y[1], Column)
-        assert isinstance(self.y[2], Column)
-        assert isinstance(self.y[3], Column)
-        assert isinstance(self.y[4], Column)
-        assert isinstance(self.y[-1], Column)
-        assert isinstance(self.y[-2], Column)
-        assert isinstance(self.y[-5], Column)
-
-        assert self.y[0].data == [1]
-        assert self.y[1].data == [2]
-        assert self.y[2].data == [3]
-        assert self.y[3].data == [4]
-        assert self.y[4].data == [5]
-        assert self.y[-1].data == [5]
-        assert self.y[-2].data == [4]
-        assert self.y[-5].data == [1]
+        for i in range(self.n):
+            assert isinstance(self.y[i], int)
+        for i in [-1, -2, -3, -4, -5]:
+            assert isinstance(self.y[i], int)
 
     def test_invalid_int_indexing(self):
         with pytest.raises(IndexError):
@@ -82,8 +74,17 @@ class TestBasicColumnIndexing:
 
     def test_invalid_indexing_by_type(self):
         with pytest.raises(TypeError):
-            # Column cannot be indexed using str
+            # Array cannot be indexed using str
             self.y['a']
         with pytest.raises(TypeError):
-            # Column cannot be indexed using float
+            # Array cannot be indexed using str
+            self.y['']
+        with pytest.raises(TypeError):
+            # Array cannot be indexed using str
+            self.y[' ']
+        with pytest.raises(TypeError):
+            # Array cannot be indexed using str
+            self.y['invalid']
+        with pytest.raises(TypeError):
+            # Array cannot be indexed using float
             self.y[34.45]

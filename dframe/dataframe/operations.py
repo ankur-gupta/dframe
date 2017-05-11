@@ -1,11 +1,26 @@
-from dataframe import DataFrame
-from utils import is_list_unique, is_list_same
+from __future__ import absolute_import
+from __future__ import print_function
+
+from dframe.scalar import is_list_same, is_list_unique
+from dframe.compat import Iterable
+from dframe.dataframe import DataFrame
 
 
-def is_iterable_dataframe_type(x):
-    # Empty list returns True
-    for item in x:
-        if not isinstance(item, DataFrame):
+def is_iterable_dataframe(x):
+    ''' Returns True when all elements are DataFrame type.
+        Empty list returns True. None(s) are not treated as DataFrame type.
+
+        Args
+        -----
+        x (iterable)
+
+        Returns
+        --------
+        bool
+    '''
+    assert isinstance(x, Iterable)
+    for elem in x:
+        if not isinstance(elem, DataFrame):
             return False
     return True
 
@@ -23,20 +38,20 @@ def hstack(dfs):
         --------
         DataFrame
     '''
-    if is_iterable_dataframe_type(dfs):
+    if is_iterable_dataframe(dfs):
         if is_list_same([df.nrow for df in dfs]):
-            names_per_df = [name for df in dfs for name in df.names]
-            if is_list_unique(names_per_df):
-                items = [column for df in dfs for column in df.items()]
+            names = [name for df in dfs for name in df.names]
+            if is_list_unique(names):
+                items = [item for df in dfs for item in df.items()]
                 return DataFrame.from_items(items)
             else:
-                msg = 'column names must not be repeated across DataFrames'
+                msg = 'repeated column names found'
                 raise ValueError(msg)
         else:
-            msg = 'all DataFrames must have the same number of rows'
+            msg = 'DataFrames do not have the same number of rows'
             raise ValueError(msg)
     else:
-        msg = 'all elements of input list must be DataFrame types'
+        msg = 'all elements of input list must be DataFrame type'
         raise ValueError(msg)
 
 
@@ -71,30 +86,25 @@ def vstack(dfs):
         DataFrame: Column names are the same as the column names of the first
             DataFrame of the sequence.
     '''
-    if is_iterable_dataframe_type(dfs):
+    if is_iterable_dataframe(dfs):
         if is_list_same([df.ncol for df in dfs]):
             if len(dfs) == 0:
                 names = []
             else:
                 names = dfs[0].names
-            dtypes_per_df = [tuple(df.dtypes) for df in dfs]
-            if is_list_same(dtypes_per_df):
+            dtypes = [tuple(df.dtypes) for df in dfs]
+            if is_list_same(dtypes):
                 items = [(name, [elem for df in dfs for elem in df[j]])
                          for j, name in enumerate(names)]
                 return DataFrame.from_items(items)
-                # # This incredibly slow but simple to understand
-                # # step was in the previous implementation.
-                # # FIXME: Remove this after testing.
-                # rows = [row for df in dfs for row in df.rows()]
-                # return DataFrame.from_rows(rows)
             else:
                 msg = 'columns must have the same dtypes in the same order'
                 raise ValueError(msg)
         else:
-            msg = 'all DataFrames must have the same number of columns'
+            msg = 'DataFrames do not have the same number of columns'
             raise ValueError(msg)
     else:
-        msg = 'all elements of input list must be DataFrame types'
+        msg = 'all elements of input list must be DataFrame type'
         raise ValueError(msg)
 
 
@@ -114,7 +124,7 @@ def rbind(dfs):
         DataFrame: The order of column names is the same as the first
             DataFrame in the sequence.
     '''
-    if is_iterable_dataframe_type(dfs):
+    if is_iterable_dataframe(dfs):
         if is_list_same([df.ncol for df in dfs]):
             names_per_df = [frozenset(df.names) for df in dfs]
             if is_list_same(names_per_df):
@@ -123,26 +133,21 @@ def rbind(dfs):
                 else:
                     names = dfs[0].names
                 dfs = [df[names] for df in dfs]
-                dtypes_per_df = [tuple(df.dtypes) for df in dfs]
-                if is_list_same(dtypes_per_df):
+                dtypes = [tuple(df.dtypes) for df in dfs]
+                if is_list_same(dtypes):
                     items = [(name, [elem for df in dfs for elem in df[name]])
                              for name in names]
                     return DataFrame.from_items(items)
-                    # # This incredibly slow but simple to understand
-                    # # step was in the previous implementation.
-                    # # FIXME: Remove this after testing.
-                    # rows = [row for df in dfs for row in df.rows()]
-                    # return DataFrame.from_rows(rows)
                 else:
-                    msg = ('columns of the same name must have the same '
-                           'dtype')
+                    msg = 'columns must have the same dtypes'
                     raise ValueError(msg)
             else:
-                msg = 'all DataFrames must have the same column names'
+                msg = 'DataFrames do not have the same column names'
                 raise ValueError(msg)
         else:
-            msg = 'all DataFrames must have the same number of columns'
+            msg = 'DataFrames do not have the same number of columns'
             raise ValueError(msg)
     else:
-        msg = 'all elements of input list must be DataFrame types'
+        msg = 'all elements of input list must be DataFrame type'
         raise ValueError(msg)
+

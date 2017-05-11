@@ -1,9 +1,11 @@
+from __future__ import print_function
+from __future__ import absolute_import
+
 import pytest
-from ..dataframe import DataFrame
-# from dframe import DataFrame
+from dframe import DataFrame
 
 
-class TestAtomicTypeDualIndexing:
+class TestScalarScalarDualIndexing:
     # Define a dataframe that will be used for testing
     x = DataFrame({'a': [1, 2, 3], 'b': ['a', 'b', 'c']})
 
@@ -184,79 +186,79 @@ class TestAtomicTypeDualIndexing:
 
     def test_invalid_str_int(self):
         ''' Rows cannot be addressed by str '''
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['a', 0]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['a', 1]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['a', 2]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['a', 3]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['a', -1]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['a', -2]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['a', -3]
 
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['b', 0]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['b', 1]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['b', 2]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['b', 3]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['b', -1]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['b', -2]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['b', -3]
 
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['', 0]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['', 1]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['', 2]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['', 3]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['', -1]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['', -2]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['', -3]
 
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x[' ', 0]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x[' ', 1]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x[' ', 2]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x[' ', 3]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x[' ', -1]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x[' ', -2]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x[' ', -3]
 
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['invalid column', 0]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['invalid column', 1]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['invalid column', 2]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['invalid column', 3]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['invalid column', -1]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['invalid column', -2]
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['invalid column', -3]
 
     def test_valid_str_str(self):
@@ -265,111 +267,70 @@ class TestAtomicTypeDualIndexing:
 
     def test_invalid_str_str(self):
         ''' Rows cannot be addressed by str '''
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['a', 'a']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['a', 'b']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['a', 'c']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['a', '']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['a', ' ']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['a', 'invalid column']
 
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['b', 'a']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['b', 'b']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['b', 'c']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['b', '']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['b', ' ']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['b', 'invalid column']
 
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['', 'a']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['', 'b']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['', 'c']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['', '']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['', ' ']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['', 'invalid column']
 
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x[' ', 'a']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x[' ', 'b']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x[' ', 'c']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x[' ', '']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x[' ', ' ']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x[' ', 'invalid column']
 
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['invalid column', 'a']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['invalid column', 'b']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['invalid column', 'c']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['invalid column', '']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['invalid column', ' ']
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             self.x['invalid column', 'invalid column']
 
-
-class TestAtomicSliceDualIndexing:
-    ''' These should return dataframes and not underlying list objects '''
-    x = DataFrame({'a': [1, 2, 3], 'b': ['a', 'b', 'c'],
-                   'c': [True, False, True]})
-
-    def test_valid_int_slice(self):
-        assert isinstance(self.x[0, :], DataFrame)
-        assert not isinstance(self.x[0, :], list)
-        assert isinstance(self.x[1, :], DataFrame)
-        assert not isinstance(self.x[1, :], list)
-        assert isinstance(self.x[2, :], DataFrame)
-        assert not isinstance(self.x[2, :], list)
-        assert isinstance(self.x[-1, :], DataFrame)
-        assert not isinstance(self.x[-1, :], list)
-        assert isinstance(self.x[0, 0:], DataFrame)
-        assert not isinstance(self.x[0, 0:], list)
-        assert isinstance(self.x[1, 0:], DataFrame)
-        assert not isinstance(self.x[1, 0:], list)
-        assert isinstance(self.x[0, 0:], DataFrame)
-        assert not isinstance(self.x[0, 0:], list)
-        assert isinstance(self.x[1, 0:], DataFrame)
-        assert not isinstance(self.x[1, 0:], list)
-        assert isinstance(self.x[-1, 0:], DataFrame)
-        assert not isinstance(self.x[-1, 0:], list)
-        assert isinstance(self.x[1, 0:1], DataFrame)
-        assert not isinstance(self.x[1, 0:1], list)
-        assert isinstance(self.x[1, 0:2], DataFrame)
-        assert not isinstance(self.x[1, 0:2], list)
-        assert isinstance(self.x[1, 0:3:2], DataFrame)
-        assert not isinstance(self.x[1, 0:3:2], list)
-
-
-class TestAtomicListDualIndexing:
-    ''' These should return dataframes and not underlying list objects '''
-    x = DataFrame({'a': [1, 2, 3], 'b': ['a', 'b', 'c'],
-                   'c': [True, False, True]})
-
-    def test_valid_int_list(self):
-        assert isinstance(self.x[0, [0]], DataFrame)
-        assert isinstance(self.x[0, [0, 1]], DataFrame)
 
 

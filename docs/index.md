@@ -19,4 +19,4 @@ Some notable differences from [pandas dataframes](http://pandas.pydata.org/) and
 
 5. **Almost first-class missing value support.** dframe handles missing data using Python's in-built `None` instead of defining a new missing value type. You can have missing values in any `dtype`, not just in `float`. Marking one element of a column as missing value will not change the `dtype` of that column.
 
-6. **No Series vs DataFrame.** There is no object like `Series` in pandas. In dframe, `df['colname']` returns an ordinary python `list`. If you would rather have a dataframe with only one column, use `df[['colname']]`.
+6. **No Series vs DataFrame.** There is no object like `Series` in pandas. In dframe, `df['colname']` returns a `list`-like `Array` object. `Array` is sub-classed from `list` and behaves like a `list` is most ways. If you would rather have a dataframe with only one column, use `df[['colname']]`.

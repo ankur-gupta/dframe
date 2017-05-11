@@ -14,7 +14,7 @@ setup(name='dframe',
       license='',
       packages=['dframe', 'dframe.array', 'dframe.compat',
                 'dframe.dataframe', 'dframe.dtypes', 'dframe.missing',
-                'dframe.scalar', 'dframe.tests'],
+                'dframe.scalar'],
       install_requires=[
           'future',
           'pandas',

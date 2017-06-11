@@ -118,7 +118,7 @@ class TestDataFrameFromNumpy:
         assert isinstance(xdf, DataFrame)
         assert xdf.shape == self.x.shape
         assert xdf.names.equals(Array(['C0', 'C1', 'C2', 'C3']))
-        assert all(xdf.dtypes == np.int64)
+        assert all(xdf.dtypes == int)
         for i in range(xdf.nrow):
             for j in range(xdf.ncol):
                 assert xdf[i, j] == self.x[i, j]
@@ -127,7 +127,7 @@ class TestDataFrameFromNumpy:
         assert isinstance(xdf, DataFrame)
         assert xdf.shape == self.x.shape
         assert xdf.names.equals(Array(self.names))
-        assert all(xdf.dtypes == np.int64)
+        assert all(xdf.dtypes == int)
         for i in range(xdf.nrow):
             for j in range(xdf.ncol):
                 assert xdf[i, j] == self.x[i, j]
@@ -137,7 +137,7 @@ class TestDataFrameFromNumpy:
         assert isinstance(ydf, DataFrame)
         assert ydf.shape == self.y.shape
         assert ydf.names.equals(Array(['C0', 'C1']))
-        assert all(ydf.dtypes == np.float64)
+        assert all(ydf.dtypes == float)
         for i in range(ydf.nrow):
             for j in range(ydf.ncol):
                 if np.isnan(self.y[i, j]):

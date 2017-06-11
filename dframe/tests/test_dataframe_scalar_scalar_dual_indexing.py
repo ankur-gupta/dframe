@@ -114,13 +114,13 @@ class TestScalarScalarDualIndexing:
         with pytest.raises(KeyError):
             self.x[2, '']
 
-        with pytest.raises(IndexError):
+        with pytest.raises(KeyError):
             self.x[3, 'c']
-        with pytest.raises(IndexError):
+        with pytest.raises(KeyError):
             self.x[3, 'invalid column']
-        with pytest.raises(IndexError):
+        with pytest.raises(KeyError):
             self.x[3, ' ']
-        with pytest.raises(IndexError):
+        with pytest.raises(KeyError):
             self.x[3, '']
         with pytest.raises(KeyError):
             self.x[-1, 'c']
@@ -155,29 +155,29 @@ class TestScalarScalarDualIndexing:
             self.x[-4, 'b']
         with pytest.raises(IndexError):
             self.x[-5, 'b']
-        with pytest.raises(IndexError):
+        with pytest.raises(KeyError):
             self.x[3, 'invalid column']
-        with pytest.raises(IndexError):
+        with pytest.raises(KeyError):
             self.x[4, 'invalid column']
-        with pytest.raises(IndexError):
+        with pytest.raises(KeyError):
             self.x[-4, 'invalid column']
-        with pytest.raises(IndexError):
+        with pytest.raises(KeyError):
             self.x[-5, 'invalid column']
-        with pytest.raises(IndexError):
+        with pytest.raises(KeyError):
             self.x[3, ' ']
-        with pytest.raises(IndexError):
+        with pytest.raises(KeyError):
             self.x[4, ' ']
-        with pytest.raises(IndexError):
+        with pytest.raises(KeyError):
             self.x[-4, ' ']
-        with pytest.raises(IndexError):
+        with pytest.raises(KeyError):
             self.x[-5, ' ']
-        with pytest.raises(IndexError):
+        with pytest.raises(KeyError):
             self.x[3, '']
-        with pytest.raises(IndexError):
+        with pytest.raises(KeyError):
             self.x[4, '']
-        with pytest.raises(IndexError):
+        with pytest.raises(KeyError):
             self.x[-4, '']
-        with pytest.raises(IndexError):
+        with pytest.raises(KeyError):
             self.x[-5, '']
 
     def test_valid_str_int(self):
@@ -190,75 +190,75 @@ class TestScalarScalarDualIndexing:
             self.x['a', 0]
         with pytest.raises(TypeError):
             self.x['a', 1]
-        with pytest.raises(TypeError):
+        with pytest.raises(IndexError):
             self.x['a', 2]
-        with pytest.raises(TypeError):
+        with pytest.raises(IndexError):
             self.x['a', 3]
         with pytest.raises(TypeError):
             self.x['a', -1]
         with pytest.raises(TypeError):
             self.x['a', -2]
-        with pytest.raises(TypeError):
+        with pytest.raises(IndexError):
             self.x['a', -3]
 
         with pytest.raises(TypeError):
             self.x['b', 0]
         with pytest.raises(TypeError):
             self.x['b', 1]
-        with pytest.raises(TypeError):
+        with pytest.raises(IndexError):
             self.x['b', 2]
-        with pytest.raises(TypeError):
+        with pytest.raises(IndexError):
             self.x['b', 3]
         with pytest.raises(TypeError):
             self.x['b', -1]
         with pytest.raises(TypeError):
             self.x['b', -2]
-        with pytest.raises(TypeError):
+        with pytest.raises(IndexError):
             self.x['b', -3]
 
         with pytest.raises(TypeError):
             self.x['', 0]
         with pytest.raises(TypeError):
             self.x['', 1]
-        with pytest.raises(TypeError):
+        with pytest.raises(IndexError):
             self.x['', 2]
-        with pytest.raises(TypeError):
+        with pytest.raises(IndexError):
             self.x['', 3]
         with pytest.raises(TypeError):
             self.x['', -1]
         with pytest.raises(TypeError):
             self.x['', -2]
-        with pytest.raises(TypeError):
+        with pytest.raises(IndexError):
             self.x['', -3]
 
         with pytest.raises(TypeError):
             self.x[' ', 0]
         with pytest.raises(TypeError):
             self.x[' ', 1]
-        with pytest.raises(TypeError):
+        with pytest.raises(IndexError):
             self.x[' ', 2]
-        with pytest.raises(TypeError):
+        with pytest.raises(IndexError):
             self.x[' ', 3]
         with pytest.raises(TypeError):
             self.x[' ', -1]
         with pytest.raises(TypeError):
             self.x[' ', -2]
-        with pytest.raises(TypeError):
+        with pytest.raises(IndexError):
             self.x[' ', -3]
 
         with pytest.raises(TypeError):
             self.x['invalid column', 0]
         with pytest.raises(TypeError):
             self.x['invalid column', 1]
-        with pytest.raises(TypeError):
+        with pytest.raises(IndexError):
             self.x['invalid column', 2]
-        with pytest.raises(TypeError):
+        with pytest.raises(IndexError):
             self.x['invalid column', 3]
         with pytest.raises(TypeError):
             self.x['invalid column', -1]
         with pytest.raises(TypeError):
             self.x['invalid column', -2]
-        with pytest.raises(TypeError):
+        with pytest.raises(IndexError):
             self.x['invalid column', -3]
 
     def test_valid_str_str(self):
@@ -271,65 +271,65 @@ class TestScalarScalarDualIndexing:
             self.x['a', 'a']
         with pytest.raises(TypeError):
             self.x['a', 'b']
-        with pytest.raises(TypeError):
+        with pytest.raises(KeyError):
             self.x['a', 'c']
-        with pytest.raises(TypeError):
+        with pytest.raises(KeyError):
             self.x['a', '']
-        with pytest.raises(TypeError):
+        with pytest.raises(KeyError):
             self.x['a', ' ']
-        with pytest.raises(TypeError):
+        with pytest.raises(KeyError):
             self.x['a', 'invalid column']
 
         with pytest.raises(TypeError):
             self.x['b', 'a']
         with pytest.raises(TypeError):
             self.x['b', 'b']
-        with pytest.raises(TypeError):
+        with pytest.raises(KeyError):
             self.x['b', 'c']
-        with pytest.raises(TypeError):
+        with pytest.raises(KeyError):
             self.x['b', '']
-        with pytest.raises(TypeError):
+        with pytest.raises(KeyError):
             self.x['b', ' ']
-        with pytest.raises(TypeError):
+        with pytest.raises(KeyError):
             self.x['b', 'invalid column']
 
         with pytest.raises(TypeError):
             self.x['', 'a']
         with pytest.raises(TypeError):
             self.x['', 'b']
-        with pytest.raises(TypeError):
+        with pytest.raises(KeyError):
             self.x['', 'c']
-        with pytest.raises(TypeError):
+        with pytest.raises(KeyError):
             self.x['', '']
-        with pytest.raises(TypeError):
+        with pytest.raises(KeyError):
             self.x['', ' ']
-        with pytest.raises(TypeError):
+        with pytest.raises(KeyError):
             self.x['', 'invalid column']
 
         with pytest.raises(TypeError):
             self.x[' ', 'a']
         with pytest.raises(TypeError):
             self.x[' ', 'b']
-        with pytest.raises(TypeError):
+        with pytest.raises(KeyError):
             self.x[' ', 'c']
-        with pytest.raises(TypeError):
+        with pytest.raises(KeyError):
             self.x[' ', '']
-        with pytest.raises(TypeError):
+        with pytest.raises(KeyError):
             self.x[' ', ' ']
-        with pytest.raises(TypeError):
+        with pytest.raises(KeyError):
             self.x[' ', 'invalid column']
 
         with pytest.raises(TypeError):
             self.x['invalid column', 'a']
         with pytest.raises(TypeError):
             self.x['invalid column', 'b']
-        with pytest.raises(TypeError):
+        with pytest.raises(KeyError):
             self.x['invalid column', 'c']
-        with pytest.raises(TypeError):
+        with pytest.raises(KeyError):
             self.x['invalid column', '']
-        with pytest.raises(TypeError):
+        with pytest.raises(KeyError):
             self.x['invalid column', ' ']
-        with pytest.raises(TypeError):
+        with pytest.raises(KeyError):
             self.x['invalid column', 'invalid column']
 
 

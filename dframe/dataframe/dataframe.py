@@ -3,22 +3,34 @@ from __future__ import print_function
 from __future__ import division
 from builtins import range
 
+import warnings
 from prettytable import PrettyTable
 from collections import OrderedDict
 import numpy as np
 import pandas as pd
-import csv
 
-from dframe.array import Array, to_best_dtype
+from dframe.array import Array
 from dframe.errors import InternalError
 from dframe.compat import Iterable
 from dframe.dtypes import is_integer, is_float, is_string, is_bool, infer_dtype
 from dframe.scalar import (is_scalar, get_length, is_list_unique, is_list_same,
-                           is_iterable_string, is_iterable_integer)
+                           is_iterable_string, is_iterable_integer,
+                           is_iterable_unique)
 
 
 def _get_generic_names(ncol):
     return ['C{}'.format(i) for i in range(ncol)]
+
+
+class _DataFrameSlice(object):
+    def __init__(self, _data, _names):
+        assert isinstance(_data, Array)
+        # Note that selection may have created an empty dataframe, which
+        # means _data can be [], which is of NoneType
+        assert (len(_data) == 0) or (_data.dtype is Array)
+        assert isinstance(_names, Array)
+        self._data = _data
+        self._names = _names
 
 
 class DataFrame(object):
@@ -27,13 +39,19 @@ class DataFrame(object):
     def __init__(self, data={}):
         if isinstance(data, dict):
             self._init_from_dict(data)
-        elif isinstance(data, self.__class__):
+        elif isinstance(data, type(self)):
             # This does not copy the underlying data a la Python and pandas.
             self._data = data._data
             self._names = data._names
-            self._names_to_index = data._names_to_index
-            self._ncol = data._ncol
             self._nrow = data._nrow
+            self._ncol = data._ncol
+            self._update_nrow_ncol()
+            self._update_names_to_index()
+        elif isinstance(data, _DataFrameSlice):
+            self._data = data._data
+            self._names = data._names
+            self._update_nrow_ncol()
+            self._update_names_to_index()
         else:
             # Default constructor only supports dict-like objects
             # Use alternate constructors for numpy/list/tuple, etc.
@@ -106,10 +124,13 @@ class DataFrame(object):
             msg = ('pandas Series is not supported, please use pandas '
                    'DataFrame instead')
             raise ValueError(msg)
+        elif isinstance(df, pd.DataFrame):
+            df.reset_index(drop=True, inplace=True)
+            items = [(name, df[name]) for name in df]
+            return cls.from_items(items)
         else:
-            assert isinstance(df, pd.DataFrame)
-        items = [(name, df[name]) for name in df]
-        return cls.from_items(items)
+            msg = 'pandas DataFrame required'
+            raise ValueError(msg)
 
     @classmethod
     def from_shape(cls, shape, names=None):
@@ -130,26 +151,22 @@ class DataFrame(object):
                     msg = 'shape elements must be non-negative'
                     raise ValueError(msg)
             else:
-                msg = 'shape elements must be integer'
+                msg = 'shape elements must be integers'
                 raise ValueError(msg)
         else:
             msg = 'shape must have exactly two elements'
             raise ValueError(msg)
 
     @classmethod
-    def from_csv(cls, path, infer_dtypes=True, header=True, delimiter=','):
-        # FIXME: Handle missing data!
-        with open(path, 'r') as f:
-            r = csv.reader(f, delimiter=delimiter)
-            rows = [row for row in r]
-        if header:
-            df = cls.from_rows(rows[1:], rows[0])
-        else:
-            df = cls.from_rows(rows)
-        if infer_dtypes:
-            for j in range(df.ncol):
-                df[j] = to_best_dtype(df[j])
-        return df
+    def from_csv(cls, filepath_or_buffer, **kwargs):
+        # Use pandas reader which is incredibly fast!
+        if 'index_col' in kwargs.keys():
+            del kwargs['index_col']
+            msg = ('index_col in keyword arguments is not allowed',
+                   'dframe does not have index at all')
+            warnings.warn(msg)
+        df = pd.read_csv(filepath_or_buffer, index_col=False, **kwargs)
+        return cls.from_pandas(df)
 
     def _init_from_dict(self, data):
         scalarity_per_value = [is_scalar(value) for value in data.values()]
@@ -172,7 +189,7 @@ class DataFrame(object):
                 [length for length, scalarity in
                  zip(length_per_value, scalarity_per_value)
                  if not scalarity])
-            if length(length_non_scalars) > 1:
+            if len(length_non_scalars) > 1:
                 msg = 'columns do not have the same length'
                 raise ValueError(msg)
             elif len(length_non_scalars) == 0:
@@ -180,6 +197,12 @@ class DataFrame(object):
                 raise InternalError(msg)
             else:
                 length = list(length_non_scalars)[0]
+
+            # Now that we have the length, we can fill out the columns
+            # using scalars.
+            for i, value in enumerate(data.values()):
+                if scalarity_per_value[i]:
+                    _data[i] = Array([value] * length)
         else:
             # All values are non-scalars. No need to box them.
             _data = [Array(value) for value in data.values()]
@@ -235,8 +258,7 @@ class DataFrame(object):
             out = 'DataFrame with {} rows and {} columns'
             return out.format(self.nrow, self.ncol)
         else:
-            headers = self.names
-            headers.insert(0, '')
+            headers = [''] + [name for name in self._names]
             table = PrettyTable(headers)
             if self.nrow <= self._print_max_nrows:
                 for i, row in enumerate(self.rows()):
@@ -244,17 +266,25 @@ class DataFrame(object):
                     table.add_row(row)
                 return str(table)
             else:
-                for i in range(self._print_max_nrows // 2):
-                    row = self[i, :].rows()[0]
+                # Top rows
+                top = self[range(self._print_max_nrows // 2), :]
+                for i, row in enumerate(top.rows()):
                     row.insert(0, i)
                     table.add_row(row)
+
+                # Divider to indicate longer
                 divider = ['...' for _ in range(self.ncol)]
                 divider.insert(0, '')
                 table.add_row(divider)
-                for i in range(self._print_max_nrows // 2, 0, -1):
-                    row = self[self.nrow - i, :].rows()[0]
-                    row.insert(0, self.nrow - i)
+
+                # Bottom rows
+                bottom_row_index = range(
+                    self._nrow - self._print_max_nrows // 2, self._nrow)
+                bottom = self[bottom_row_index, :]
+                for i, row in zip(bottom_row_index, bottom.rows()):
+                    row.insert(0, i)
                     table.add_row(row)
+
                 out = '{}\n\n[{} rows x {} columns]'
                 return out.format(str(table), self.nrow, self.ncol)
 
@@ -305,8 +335,7 @@ class DataFrame(object):
         return [(key, value) for key, value in zip(self.keys(), self.values())]
 
     def rows(self):
-        return [[self._data[col_index][row_index]
-                for col_index in range(self._ncol)]
+        return [[column[row_index] for _, column in enumerate(self._data)]
                 for row_index in range(self._nrow)]
 
     def columns(self):
@@ -327,37 +356,56 @@ class DataFrame(object):
         elif is_string(key):
             return self._data[self._names_to_index[key]]
         elif isinstance(key, slice):
-            return DataFrame.from_items(zip(self._names[key], self._data[key]))
+            return type(self)(
+                _DataFrameSlice(self._data[key], self._names[key]))
         elif isinstance(key, list):
             if is_iterable_string(key):
                 key = [self._names_to_index[k] for k in key]
-            return DataFrame.from_items(zip(self._names[key], self._data[key]))
+            if not is_iterable_unique(self._names[key]):
+                msg = 'duplicate column names found'
+                raise KeyError(msg)
+            return type(self)(
+                _DataFrameSlice(self._data[key], self._names[key]))
         elif isinstance(key, tuple):
             # Dual Indexing. Select both rows and columns.
             if len(key) == 2:
                 rowkey = key[0]
                 colkey = key[1]
-                if isinstance(colkey, tuple):
-                    colkey = list(colkey)
-                if is_integer(rowkey):
-                    row_items = [
-                        (name, [value[rowkey]])
-                        for name, value in zip(self._names, self._data)]
+                if is_float(colkey):
+                    msg = ('float column index is not supported; '
+                           'please cast to int')
+                    raise KeyError(msg)
+                elif is_bool(colkey):
+                    msg = ('logical column indexing must provide a '
+                           'list of full length')
+                    raise KeyError(msg)
+                elif is_integer(colkey):
+                    return self._data[colkey][rowkey]
+                elif is_string(colkey):
+                    return self._data[self._names_to_index[colkey]][rowkey]
+                elif isinstance(colkey, (slice, Iterable)):
+                    if isinstance(colkey, Iterable):
+                        if is_iterable_string(colkey):
+                            colkey = [self._names_to_index[k] for k in colkey]
+                    _names = self._names[colkey]
+                    if not is_iterable_unique(_names):
+                        msg = 'duplicate column names found'
+                        raise KeyError(msg)
+                    if is_integer(rowkey):
+                        rowkey = [rowkey]
+                    _data = Array([column[rowkey]
+                                   for column in self._data[colkey]])
+                    return type(self)(_DataFrameSlice(_data, _names))
                 else:
-                    row_items = [
-                        (name, value[rowkey])
-                        for name, value in zip(self._names, self._data)]
-                selection = DataFrame.from_items(row_items)[colkey]
-
-                if is_integer(rowkey):
-                    if is_integer(colkey) or is_string(colkey):
-                        selection = selection[0]
-                return selection
+                    # Catchall for all other column addresses
+                    msg = ('column address must be int, string, slice,'
+                           ' or iterable')
+                    raise KeyError(msg)
             else:
                 msg = 'tuple indexing must have exactly 2 elements'
                 raise KeyError(msg)
         elif isinstance(key, Iterable):
-            return DataFrame.from_items(zip(self._names[key], self._data[key]))
+            return self[list(key)]
         else:
             # Catchall for all other addresses
             msg = 'address must be int, string, list, slice, or a 2-tuple'
@@ -384,8 +432,8 @@ class DataFrame(object):
         tmp = self._create_array(value)
         if len(tmp) == self._nrow:
             # FIXME: Override Array.append by checking for type
-            self._names.append(name)
-            self._data.append(tmp)
+            self._names.extend(Array([name]))
+            self._data.extend(Array([tmp]))
             self._update_nrow_ncol()
             self._update_names_to_index()
         else:
@@ -393,6 +441,8 @@ class DataFrame(object):
             raise ValueError(msg.format(self._nrow))
 
     def _parse_colkey(self, colkey):
+        # FIXME: self._data can handle slices. Should I not convert slice to
+        # list of ints here?
         if isinstance(colkey, slice):
             colkey = range(*colkey.indices(len(self)))
         if is_iterable_string(colkey):
@@ -648,12 +698,14 @@ class DataFrame(object):
             Nothing. Renaming happens in place.
         '''
         assert isinstance(rename_dict, dict)
-        updated_names = list(self._names)
+        updated_names = Array(self._names)
         for current, new in rename_dict.items():
+            # FIXME: This will fail when some names are unicode but
+            # others are not.
             updated_names[self._names_to_index[current]] = new
         if is_iterable_string(updated_names):
-            if is_list_unique(updated_names):
-                self._names = Array(updated_names)
+            if is_iterable_unique(updated_names):
+                self._names = updated_names
                 self._update_names_to_index()
                 if set(self._names_to_index.keys()) != set(self._names):
                     msg = ('renaming violated internal consistency ',
@@ -686,15 +738,5 @@ class DataFrame(object):
                     return False
             else:
                 return False
-
-
-
-
-
-
-
-
-
-
 
 

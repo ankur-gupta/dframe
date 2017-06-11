@@ -66,13 +66,10 @@ def nice_str(x):
     return output
 
 
-# class _ArraySlice(object):
-#     def __init__(self, _data, _dtype):
-#         assert isinstance(_data, pd.Series)
-#         assert isinstance(_dtype, type) or _dtype is type(None)
-
-
-
+class _ArraySlice(object):
+    def __init__(self, _data):
+        assert isinstance(_data, pd.Series)
+        self._data = _data
 
 
 class Array(object):
@@ -83,8 +80,12 @@ class Array(object):
             # Data is not copied a la pd.Series
             self._data = data._data
             self.dtype = data.dtype
+        elif isinstance(data, _ArraySlice):
+            self._data = data._data
+            self.dtype = infer_dtype(self._data)
         else:
             self._data = pd.Series(data, dtype=object)
+            # This step is really slow! Avoid this when possible.
             for index, value in enumerate(self._data):
                 try:
                     if np.isnan(value):
@@ -134,9 +135,9 @@ class Array(object):
             return self._data.iloc[key]
         elif isinstance(key, Iterable) and infer_dtype(key) is bool:
             key = self._convert_logical_index_to_int_index(key)
-            return type(self)(self._data.iloc[key])
+            return type(self)(_ArraySlice(self._data.iloc[key]))
         else:
-            return type(self)(self._data.iloc[key])
+            return type(self)(_ArraySlice(self._data.iloc[key]))
 
     def _del_by_iterable(self, key):
         assert is_iterable_integer(key)

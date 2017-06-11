@@ -35,6 +35,7 @@ class _DataFrameSlice(object):
 
 class DataFrame(object):
     _print_max_nrows = 60
+    _print_max_cols = 10
 
     def __init__(self, data={}):
         if isinstance(data, dict):
@@ -258,8 +259,14 @@ class DataFrame(object):
             out = 'DataFrame with {} rows and {} columns'
             return out.format(self.nrow, self.ncol)
         else:
+            # if self._ncol <= self._print_max_cols:
+            #     col_index = slice(None)
+            # else:
+            #     left_col_index = slice(self._print_max_cols // 2)
+            #     right_col_index = slice(self._ncol, self._print_max_cols // 2)
             headers = [''] + [name for name in self._names]
             table = PrettyTable(headers)
+            table.max_width = 10
             if self.nrow <= self._print_max_nrows:
                 for i, row in enumerate(self.rows()):
                     row.insert(0, i)
@@ -267,6 +274,7 @@ class DataFrame(object):
                 return str(table)
             else:
                 # Top rows
+                # top = self[:(self._print_max_nrows // 2), :]
                 top = self[range(self._print_max_nrows // 2), :]
                 for i, row in enumerate(top.rows()):
                     row.insert(0, i)

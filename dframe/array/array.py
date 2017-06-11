@@ -66,8 +66,32 @@ def nice_str(x):
     return output
 
 
+# class _ArraySlice(object):
+#     def __init__(self, _data, _dtype):
+#         assert isinstance(_data, pd.Series)
+#         assert isinstance(_dtype, type) or _dtype is type(None)
+
+
+
+
+
 class Array(object):
     _print_max_n_elements = 10
+
+    def __init__(self, data=[]):
+        if isinstance(data, type(self)):
+            # Data is not copied a la pd.Series
+            self._data = data._data
+            self.dtype = data.dtype
+        else:
+            self._data = pd.Series(data, dtype=object)
+            for index, value in enumerate(self._data):
+                try:
+                    if np.isnan(value):
+                        self._data[index] = None
+                except (TypeError, ValueError):
+                    pass
+            self.dtype = infer_dtype(self._data)
 
     def _is_valid_dtype_element(self, element):
         if self.dtype is type(None):
@@ -91,6 +115,28 @@ class Array(object):
             msg = 'logical index does not match array length'
             raise IndexError(msg)
         return key
+
+    def __getitem__(self, key):
+        if is_float(key):
+            msg = 'array index cannot be float; please cast to int'
+            raise TypeError(msg)
+        elif is_bool(key):
+            msg = 'logical indexing must provide an iterable of full length'
+            raise TypeError(msg)
+        elif is_string(key):
+            msg = 'array index cannot be string'
+            raise TypeError(msg)
+        elif isinstance(key, tuple):
+            msg = ('tuple is ambiguous because it can refer to dual-indexing; '
+                   'convert index to list')
+            raise TypeError(msg)
+        elif is_integer(key):
+            return self._data.iloc[key]
+        elif isinstance(key, Iterable) and infer_dtype(key) is bool:
+            key = self._convert_logical_index_to_int_index(key)
+            return type(self)(self._data.iloc[key])
+        else:
+            return type(self)(self._data.iloc[key])
 
     def _del_by_iterable(self, key):
         assert is_iterable_integer(key)
@@ -120,43 +166,6 @@ class Array(object):
     #     key = sorted(key, reverse=True)
     #     for k in key:
     #         del self._data[k]
-
-    def __init__(self, data=[]):
-        if isinstance(data, type(self)):
-            # Data is not copied a la pd.Series
-            self._data = data._data
-            self.dtype = data.dtype
-        else:
-            self._data = pd.Series(data, dtype=object)
-            for index, value in enumerate(self._data):
-                try:
-                    if np.isnan(value):
-                        self._data[index] = None
-                except (TypeError, ValueError):
-                    pass
-            self.dtype = infer_dtype(self._data)
-
-    def __getitem__(self, key):
-        if is_float(key):
-            msg = 'array index cannot be float; please cast to int'
-            raise TypeError(msg)
-        elif is_bool(key):
-            msg = 'logical indexing must provide an iterable of full length'
-            raise TypeError(msg)
-        elif is_string(key):
-            msg = 'array index cannot be string'
-            raise TypeError(msg)
-        elif isinstance(key, tuple):
-            msg = ('tuple is ambiguous because it can refer to dual-indexing; '
-                   'convert index to list')
-            raise TypeError(msg)
-        elif is_integer(key):
-            return self._data.iloc[key]
-        elif isinstance(key, Iterable) and infer_dtype(key) is bool:
-            key = self._convert_logical_index_to_int_index(key)
-            return type(self)(self._data.iloc[key])
-        else:
-            return type(self)(self._data.iloc[key])
 
     def __delitem__(self, key):
         if is_float(key):

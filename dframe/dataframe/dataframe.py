@@ -284,6 +284,7 @@ class DataFrame(object):
                 divider = ['...' for _ in range(self.ncol)]
                 divider.insert(0, '')
                 table.add_row(divider)
+                table.add_row(divider)
 
                 # Bottom rows
                 bottom_row_index = range(

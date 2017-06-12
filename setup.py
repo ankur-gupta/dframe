@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='dframe',
-      version='0.1.5',
+      version='0.1.6',
       description='Easy-to-use, indexless dataframe data structure in Python.',
       classifiers=[
           'Development Status :: 3 - Alpha',

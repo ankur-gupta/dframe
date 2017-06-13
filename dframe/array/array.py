@@ -295,6 +295,9 @@ class Array(object):
     def __not__(self):
         return Array([__not__(e) for e in self])
 
+    def __invert__(self):
+        return Array([__not__(e) for e in self])
+
     def __neg__(self):
         return Array([__neg__(e) for e in self])
 
@@ -303,6 +306,19 @@ class Array(object):
 
     def __abs__(self):
         return Array([__abs__(e) for e in self])
+
+    # def __contains__(self, other):
+    #     # seems like it works only for elements
+    #     if is_scalar(other):
+    #         for e1 in self:
+    #             if __eq__(e1, other):
+    #                 return True
+    #         return False
+    #     elif isinstance(other, Iterable):
+    #         return [e2 in self for e2 in other]
+    #     else:
+    #         msg = 'cannot perform this operation with {} object'
+    #         raise ValueError(msg.format(type(object)))
 
     def __eq__(self, other):
         if is_scalar(other):

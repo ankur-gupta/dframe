@@ -367,7 +367,7 @@ class DataFrame(object):
         elif isinstance(key, slice):
             return type(self)(
                 _DataFrameSlice(self._data[key], self._names[key]))
-        elif isinstance(key, list):
+        elif isinstance(key, Iterable) and not isinstance(key, tuple):
             if is_iterable_string(key):
                 key = [self._names_to_index[k] for k in key]
             if not is_iterable_unique(self._names[key]):
@@ -599,7 +599,7 @@ class DataFrame(object):
                 self._setitem_using_int_key(self._names_to_index[key], value)
             else:
                 self._append_new_column(key, value)
-        elif isinstance(key, (slice, list)):
+        elif isinstance(key, (slice, Iterable)) and not isinstance(key, tuple):
             key = self._parse_colkey(key)
             if is_scalar(value):
                 for k in key:
@@ -662,7 +662,7 @@ class DataFrame(object):
         elif is_string(key):
             key = [self._names_to_index[key]]
             self._delitem_colkey(key)
-        elif isinstance(key, (slice, list)):
+        elif isinstance(key, (slice, Iterable)) and not isinstance(key, tuple):
             self._delitem_colkey(key)
         elif isinstance(key, tuple):
             # Dual Indexing. Set both rows and columns.

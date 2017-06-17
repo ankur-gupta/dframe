@@ -88,3 +88,123 @@ class TestBasicArrayIndexing:
         with pytest.raises(TypeError):
             # Array cannot be indexed using float
             self.y[34.45]
+
+
+class TestArrayIsIn:
+    x = Array([])
+    y = Array([1, 2, 3])
+
+    def test_empty1(self):
+        output = self.x.isin([1])
+        assert isinstance(output, Array)
+        assert len(output) == len(self.x)
+        assert (output.dtype is bool) or (output.dtype is type(None))
+
+        output = self.x.isin([1, 2, 3, None])
+        assert isinstance(output, Array)
+        assert len(output) == len(self.x)
+        assert (output.dtype is bool) or (output.dtype is type(None))
+
+        output = self.x.isin([None])
+        assert isinstance(output, Array)
+        assert len(output) == len(self.x)
+        assert (output.dtype is bool) or (output.dtype is type(None))
+
+        output = self.x.isin([''])
+        assert isinstance(output, Array)
+        assert len(output) == len(self.x)
+        assert (output.dtype is bool) or (output.dtype is type(None))
+
+        output = self.x.isin([' '])
+        assert isinstance(output, Array)
+        assert len(output) == len(self.x)
+        assert (output.dtype is bool) or (output.dtype is type(None))
+
+        output = self.x.isin([' ', 'a', None])
+        assert isinstance(output, Array)
+        assert len(output) == len(self.x)
+        assert (output.dtype is bool) or (output.dtype is type(None))
+
+        output = self.x.isin([1.0, -1.0])
+        assert isinstance(output, Array)
+        assert len(output) == len(self.x)
+        assert (output.dtype is bool) or (output.dtype is type(None))
+
+    def test_errors(self):
+        with pytest.raises(ValueError):
+            self.x.isin(1)
+        # Look here (June 14, 2017): string is iterable.
+        with pytest.raises(ValueError):
+            self.x.isin('a')
+        with pytest.raises(ValueError):
+            self.x.isin('')
+        with pytest.raises(ValueError):
+            self.x.isin('wefjkewfk')
+        with pytest.raises(ValueError):
+            self.x.isin(' ')
+        with pytest.raises(ValueError):
+            self.x.isin(None)
+        with pytest.raises(ValueError):
+            self.x.isin(1.0)
+        with pytest.raises(ValueError):
+            self.x.isin(-1.0)
+
+        with pytest.raises(ValueError):
+            self.y.isin(1)
+        with pytest.raises(ValueError):
+            self.y.isin('a')
+        with pytest.raises(ValueError):
+            self.y.isin('')
+        with pytest.raises(ValueError):
+            self.y.isin('wefjkewfk')
+        with pytest.raises(ValueError):
+            self.y.isin(' ')
+        with pytest.raises(ValueError):
+            self.y.isin(None)
+        with pytest.raises(ValueError):
+            self.y.isin(1.0)
+        with pytest.raises(ValueError):
+            self.y.isin(-1.0)
+
+    def test_integer_array(self):
+        output = self.y.isin([1])
+        assert isinstance(output, Array)
+        assert len(output) == len(self.y)
+        assert (output.dtype is bool) or (output.dtype is type(None))
+        assert output[0] is True
+        assert output[1] is False
+        assert output[2] is False
+
+        output = self.y.isin([0])
+        assert isinstance(output, Array)
+        assert len(output) == len(self.y)
+        assert (output.dtype is bool) or (output.dtype is type(None))
+        assert output[0] is False
+        assert output[1] is False
+        assert output[2] is False
+
+        output = self.y.isin(['a'])
+        assert isinstance(output, Array)
+        assert len(output) == len(self.y)
+        assert (output.dtype is bool) or (output.dtype is type(None))
+        assert output[0] is False
+        assert output[1] is False
+        assert output[2] is False
+
+        output = self.y.isin([1.0])
+        assert isinstance(output, Array)
+        assert len(output) == len(self.y)
+        assert (output.dtype is bool) or (output.dtype is type(None))
+        assert output[0] is False
+        assert output[1] is False
+        assert output[2] is False
+
+        output = self.y.isin([[1]])
+        assert isinstance(output, Array)
+        assert len(output) == len(self.y)
+        assert (output.dtype is bool) or (output.dtype is type(None))
+        assert output[0] is False
+        assert output[1] is False
+        assert output[2] is False
+
+

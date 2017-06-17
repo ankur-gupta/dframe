@@ -10,6 +10,7 @@ from dframe.compat import Iterable
 from dframe.dtypes import (infer_dtype, to_bool, is_string, is_float, is_bool,
                            is_integer)
 from dframe.scalar import is_scalar, get_length, is_iterable_integer
+from dframe.general import identical
 from dframe.missing import (__not__, __neg__, __pos__, __abs__,
                             __eq__, __ne__, __ge__, __gt__, __le__,
                             __lt__, __or__, __and__, __xor__,
@@ -253,16 +254,8 @@ class Array(object):
                     if len(self) == len(other):
                         # FIXME: Nesting can be improved.
                         for e1, e2 in zip(self, other):
-                            try:
-                                if not e1.equals(e2):
-                                    return False
-                            except AttributeError:
-                                try:
-                                    if e1 != e2:
-                                        return False
-                                except Exception:
-                                    if e1 is not e2:
-                                        return False
+                            if not identical(e1, e2):
+                                return False
                         return True
                     else:
                         return False
@@ -291,6 +284,19 @@ class Array(object):
             end = [nice_str(e) for e in self._data.iloc[-n:]]
             output = '[{}, ..., {}]'.format(', '.join(start), ', '.join(end))
         return output
+
+    def isin(self, values):
+        if isinstance(values, Iterable) and not is_string(values):
+            output = [False] * len(self)
+            for i, e in enumerate(self):
+                for _, v in enumerate(values):
+                    output[i] = identical(e, v)
+                    if output[i] is True:
+                        break
+            return Array(output)
+        else:
+            msg = 'values must be an iterable container'
+            raise ValueError(msg)
 
     def __not__(self):
         return Array([__not__(e) for e in self])

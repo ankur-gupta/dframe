@@ -18,6 +18,10 @@ from dframe.missing import (__not__, __neg__, __pos__, __abs__,
                             __mod__, __div__, __truediv__, __floordiv__)
 
 
+def is_true(x):
+    return x is True
+
+
 def as_dtype(x, dtypefun):
     assert isinstance(x, Array)
     y = [None] * len(x)
@@ -234,6 +238,7 @@ class Array(object):
                 else:
                     msg = 'value type does not match array dtype = {}'
                     raise ValueError(msg.format(self.dtype.__name__))
+        self._data = self._data.astype(object)
         self.dtype = infer_dtype(self._data)
 
     def extend(self, other):
@@ -313,18 +318,15 @@ class Array(object):
     def __abs__(self):
         return Array([__abs__(e) for e in self])
 
-    # def __contains__(self, other):
-    #     # seems like it works only for elements
-    #     if is_scalar(other):
-    #         for e1 in self:
-    #             if __eq__(e1, other):
-    #                 return True
-    #         return False
-    #     elif isinstance(other, Iterable):
-    #         return [e2 in self for e2 in other]
-    #     else:
-    #         msg = 'cannot perform this operation with {} object'
-    #         raise ValueError(msg.format(type(object)))
+    def __contains__(self, elem):
+        if (type(elem) is self.dtype) or (elem is None):
+            for e in self._data:
+                if identical(e, elem):
+                    return True
+        return False
+
+    def _eqnone(self, elem):
+        return Array([is_true(e == elem) for e in self._data])
 
     def __eq__(self, other):
         if is_scalar(other):

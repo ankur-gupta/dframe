@@ -9,7 +9,7 @@ from collections import OrderedDict
 import numpy as np
 import pandas as pd
 
-from dframe.array import Array
+from dframe.array import Array, which
 from dframe.errors import InternalError
 from dframe.compat import Iterable
 from dframe.dtypes import is_integer, is_float, is_string, is_bool, infer_dtype
@@ -268,7 +268,7 @@ class DataFrame(object):
             table = PrettyTable(headers)
             table.max_width = 10
             if self.nrow <= self._print_max_nrows:
-                for i, row in enumerate(self.rows()):
+                for i, row in enumerate(self.rows(rows_as_tuple=False)):
                     row.insert(0, i)
                     table.add_row(row)
                 return str(table)
@@ -276,7 +276,7 @@ class DataFrame(object):
                 # Top rows
                 # top = self[:(self._print_max_nrows // 2), :]
                 top = self[range(self._print_max_nrows // 2), :]
-                for i, row in enumerate(top.rows()):
+                for i, row in enumerate(top.rows(rows_as_tuple=False)):
                     row.insert(0, i)
                     table.add_row(row)
 
@@ -290,7 +290,8 @@ class DataFrame(object):
                 bottom_row_index = range(
                     self._nrow - self._print_max_nrows // 2, self._nrow)
                 bottom = self[bottom_row_index, :]
-                for i, row in zip(bottom_row_index, bottom.rows()):
+                for i, row in zip(bottom_row_index,
+                                  bottom.rows(rows_as_tuple=False)):
                     row.insert(0, i)
                     table.add_row(row)
 
@@ -343,15 +344,24 @@ class DataFrame(object):
     def items(self):
         return [(key, value) for key, value in zip(self.keys(), self.values())]
 
-    def rows(self):
-        return [[column[row_index] for _, column in enumerate(self._data)]
-                for row_index in range(self._nrow)]
+    def rows(self, rows_as_tuple=True):
+        if rows_as_tuple:
+            return [(column[row_index] for _, column in enumerate(self._data))
+                    for row_index in range(self._nrow)]
+        else:
+            return [[column[row_index] for _, column in enumerate(self._data)]
+                    for row_index in range(self._nrow)]
 
     def columns(self):
         return self.values()
 
     def head(self, nrows=6):
         return self[:nrows, :]
+
+    def iterrows(self):
+        for row_index in range(self._nrow):
+            row = (column[row_index] for _, column in enumerate(self._data))
+            yield row
 
     def __getitem__(self, key):
         if is_float(key):
@@ -747,5 +757,90 @@ class DataFrame(object):
                     return False
             else:
                 return False
+
+    def _get_groupby_dict(self, names=None):
+        if names is None:
+            selected_columns = range(self._ncol)
+        else:
+            selected_columns = [self._names_to_index[name] for name in names]
+        groupby_dict = {}
+        for row_index in range(self._nrow):
+            # print('row_index = ', row_index)
+            row = tuple(column[row_index] for _, column in
+                        enumerate(self._data[selected_columns]))
+            if row not in groupby_dict:
+                groupby_dict[row] = []
+        return groupby_dict, selected_columns
+
+    def groupby(self, names=None):
+        groupby_dict, selected_columns = self._get_groupby_dict(names)
+        print('selected_columns =', selected_columns)
+        print('len(groupby_dict) =', len(groupby_dict))
+        for row in groupby_dict.iterkeys():
+            import time
+            start = time.time()
+            selected_rows = Array([True] * self._nrow)
+            for i, e in zip(selected_columns, row):
+                if any(selected_rows):
+                    tmp = self._data[i][selected_rows]._eqnone(e)
+                    selected_rows[selected_rows] = \
+                        selected_rows[selected_rows] & tmp
+                else:
+                    break
+            groupby_dict[row] = selected_rows
+            end = time.time()
+            time_taken = end - start
+            print('time_taken =', time_taken)
+        return groupby_dict
+
+
+    # def groupby(self, names=None):
+    #     import time
+    #     if names is None:
+    #         selected_columns = range(self._ncol)
+    #     else:
+    #         selected_columns = [self._names_to_index[name] for name in names]
+    #     groupby_dict = {}
+    #     for row_index in range(self._nrow):
+    #         # print('row_index = ', row_index)
+    #         row = tuple(column[row_index]
+    #                     for _, column in enumerate(self._data[selected_columns]))
+    #         if row not in groupby_dict:
+    #             start = time.time()
+    #             row_logical = Array([True] * self._nrow)
+    #             for col_index, elem in enumerate(row):
+    #                 # print('row_logical.dtype = ', row_logical.dtype)
+    #                 # print('sum(row_logical) = ', sum(row_logical))
+    #                 if all(row_logical) is False:
+    #                     break
+    #                 tmp = self._data[selected_columns[col_index]][row_logical]._eqnone(elem)
+    #                 # print('sum(tmp) = ', sum(tmp))
+    #                 # abc = row_logical[row_logical] and tmp
+    #                 # print('sum(abc) = ', sum(abc))
+    #                 # import ipdb; ipdb.set_trace()
+    #                 row_logical[row_logical] = row_logical[row_logical] and tmp
+    #             end = time.time()
+    #             time_taken = end - start
+    #             print('time_taken =', time_taken)
+    #             groupby_dict[row] = which(row_logical)
+    #     return groupby_dict
+
+    # def groupby(self, names=None):
+    #     if names is None:
+    #         selected_columns = range(self._ncol)
+    #     else:
+    #         selected_columns = [self._names_to_index[name] for name in names]
+    #     groupby_dict = {}
+    #     for row_index in range(self._nrow):
+    #         print('row_index = ', row_index)
+    #         row = tuple(column[row_index]
+    #                     for _, column in enumerate(self._data[selected_columns]))
+    #         if row not in groupby_dict:
+    #             row_logical = Array([True] * self._nrow)
+    #             for col_index, elem in enumerate(row):
+    #                 tmp = self._data[selected_columns[col_index]].isin([elem])
+    #                 row_logical = row_logical and tmp
+    #             groupby_dict[row] = which(row_logical)
+    #     return groupby_dict
 
 
